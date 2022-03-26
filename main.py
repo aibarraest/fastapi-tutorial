@@ -107,3 +107,17 @@ def delete_student(student_id: int):
         return {"error": "No student was found."}
     del students[student_id]
     return {"message": "Student with ID " + str(student_id) + " was successfully deleted."}
+
+
+"""
+Something to consider:
+If the same endpoint name is used and the same method is used, like so:
+
+@app.get("/students/{student_id}", status_code=status.HTTP_200_OK)
+@app.get("/students/{age}", status_code=status.HTTP_200_OK)
+
+even if they have different path parameters, the endpoint that will be called will be the one that was declared first,
+so in this case, it would be:
+
+@app.get("/students/{student_id}", status_code=status.HTTP_200_OK)
+"""
