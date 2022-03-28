@@ -2,24 +2,30 @@ from fastapi import FastAPI, status
 from typing import Optional
 from pydantic import BaseModel
 
-app = FastAPI()  # Instance the FastAPI object
+app = FastAPI()  # Instance the FastAPI object, fastapi-instance-variable
+
+
+@app.get("/", status_code=status.HTTP_200_OK)
+def index() -> dict:
+    return {"message": "Hello World!"}
+
 
 # We won't have written data into our code like the dict so to persist this data, this is when the database comes in
 students = {
     1: {
         "name": "John",
         "age": 17,
-        "class": "year 12"
+        "year": "year 12"
     },
     2: {
         "name": "Jane",
         "age": 14,
-        "class": "year 9"
+        "year": "year 9"
     },
     3: {
         "name": "Julia",
         "age": 16,
-        "class": "year 11"
+        "year": "year 11"
     }
 }
 
@@ -28,11 +34,6 @@ class Student(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
     year: Optional[str] = None
-
-
-@app.get("/", status_code=status.HTTP_200_OK)
-def index() -> dict:
-    return {"message": "Hello World!"}
 
 
 @app.get("/students", status_code=status.HTTP_200_OK)
@@ -50,6 +51,7 @@ def get_student_by_name(name: str):
     for student_id in students:
         if students[student_id]["name"].lower() == name.lower():
             return students[student_id]
+    # This is where we would return a status 404 Not Found
     return {"error": "The student was not found."}
 
 
@@ -82,25 +84,7 @@ def update_student(student: Student, student_id: int):
     return students[student_id]
 
 
-@app.patch("/student/{student_id}", status_code=status.HTTP_200_OK)
-def update_part_of_student(student: Student, student_id: int):
-    if student_id not in students:
-        # This is where we would return a status 404 Not Found
-        return {"error": "No student was found."}
-    # I added the "string" validation because of swagger, but normally I would just leave the other two.
-    if student.name != "string" and student.name is not None and student.name != "":
-        students[student_id]["name"] = student.name
-    if student.age is not None:
-        if student.age > 0:  # Because of error TypeError: '>' not supported between instances of 'NoneType' and 'int'
-            students[student_id]["age"] = student.age
-    if student.year != "string" and student.year is not None and student.year != "":
-        students[student_id]["year"] = student.year
-    # Normally, this would only return a status 204 No Content with no body so in the front end part would call another
-    # action like cleaning the form or returning to the home page, etc.
-    return students[student_id]
-
-
-@app.get("/student/{student_id}", status_code=status.HTTP_200_OK)
+@app.delete("/student/{student_id}", status_code=status.HTTP_200_OK)
 def delete_student(student_id: int):
     if student_id not in students:
         # This is where we would return a status 404 Not Found
